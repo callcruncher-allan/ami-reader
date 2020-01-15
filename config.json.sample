@@ -1,0 +1,13 @@
+{
+  "HOST_DEVICE_ID": "sng7101",
+  "AMI_HOST": "192.168.175.235",
+  "AMI_PORT": "5038",
+  "AMI_USER": "dyncc-rx",
+  "AMI_PASS": "", // Will check AMI_CONF_PATH if this is empty or not set in env
+  "AMI_CONF_PATH": "/etc/asterisk/manager.conf",
+  "DIAL_TIMEOUT": "10",
+  "DIAL_RETRY": "3",
+  "READ_TIMEOUT": "5",
+  "NUMBER_OF_WORKERS": "50",
+  "NUMBER_OF_JOBS": "60"
+}
