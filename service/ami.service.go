@@ -77,20 +77,20 @@ func (service *amiService) Connect() error {
 }
 
 func (service *amiService) Login() error {
-	conn := service.con
+	con := service.con
 	appConfig := service.appConfig
 	action := map[string]string{
 		"Action":   "Login",
-		"ActionID": "1",
+		"ActionID": *appConfig.HostDeviceId + " Login",
 		"Username": *appConfig.AmiUsername,
 		"Secret":   *appConfig.AmiPassword,
 	}
 	serialized := serialize(action)
-	_, err := conn.Write(serialized)
+	_, err := con.Write(serialized)
 	if err != nil {
 		return err
 	}
-	reader := bufio.NewReader(conn)
+	reader := bufio.NewReader(con)
 	result, err := readMessage(reader)
 	if err != nil {
 		return err
@@ -132,11 +132,29 @@ func (service *amiService) Listen() error {
 
 func (service *amiService) Disconnect() {
 	if service.con != nil {
-		if service.isLoggedIn {
-			log.Info("Logging out from AMI.")
-			// TODO: Logout logic
-		}
 		con := service.con
+		if service.isLoggedIn {
+			service.isLoggedIn = false
+			log.Info("Logging out from AMI.")
+			appConfig := service.appConfig
+			action := map[string]string{
+				"Action":   "Logoff",
+				"ActionID": *appConfig.HostDeviceId + " Logoff",
+			}
+			serialized := serialize(action)
+			_, err := con.Write(serialized)
+			if err != nil {
+				log.Errorf("Failed to logoff from AMI. Reason: %v.", err)
+			} else {
+				reader := bufio.NewReader(con)
+				result, err := readMessage(reader)
+				if err != nil {
+					log.Errorf("Failed to read logoff response from AMI. Reason: %v.", err)
+				} else {
+					log.Infof("AMI Logoff response: %s", result["Message"])
+				}
+			}
+		}
 		service.connected = false
 		service.con = nil
 		err := con.Close()
