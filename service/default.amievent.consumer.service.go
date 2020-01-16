@@ -4,7 +4,6 @@ import (
 	"ami-reader/conf"
 	"encoding/json"
 	"fmt"
-	"time"
 )
 
 type defaultAmiEventConsumer struct {
@@ -32,7 +31,6 @@ func (service *defaultAmiEventConsumer) Destroy() {
 }
 
 func (service *defaultAmiEventConsumer) Consume(event map[string]string) {
-	event["timestamp"] = time.Now().Format(time.RFC3339Nano)
 	service.eventJobChan <- event
 }
 

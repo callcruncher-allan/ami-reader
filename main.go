@@ -1,16 +1,14 @@
 package main
 
 import (
-    "ami-reader/conf"
-    "ami-reader/service"
+	"ami-reader/conf"
+	"ami-reader/service"
     "fmt"
-    log "github.com/sirupsen/logrus"
-    "github.com/spf13/viper"
-    "strings"
-    "time"
-
-    //"net"
-    "os"
+	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
+	"os"
+	"strings"
+	"time"
 )
 
 func init() {
@@ -28,37 +26,36 @@ func init() {
 }
 
 func main() {
-    log.Info("Loading app configurations.")
-    loadEnv()
-    appConfig, err := conf.NewAppConf()
-    if err != nil {
-        log.Errorf("Failed to initialize app config. Reason: %v", err)
-        return
-    }
-    log.Infof("Loaded Configs:\nAMI Host: %s\nAMI Port: %d\nAMI User: %s\nHost Device ID: %s", *appConfig.AmiHost, *appConfig.AmiPort, *appConfig.AmiUsername, *appConfig.HostDeviceId)
-    amiEventConsumer := service.NewRabbitMQAmiEventConsumerService(appConfig)
-    amiService := service.NewAmiService(appConfig, amiEventConsumer)
-    log.Infof("Connecting to AMI.")
-    if err := amiService.Connect(); err != nil {
-        log.Errorf("AMI Service failed to connect. Reason: %v.", err)
-        amiService.Disconnect()
-        return
-    }
-    log.Info("Logging in to AMI.")
-    if err := amiService.Login(); err != nil {
-        log.Errorf("Failed to login to Asterisk. Reason: %v.", err)
-    }
-    if amiService.IsLoggedIn() {
-        log.Info("Login Successful.")
-        if err := amiService.Listen(); err != nil {
-            if !strings.Contains(err.Error(), "use of closed network connection") {
-                log.Errorf("Error listening for events. Reason: %v.", err)
-            } else if amiService.IsConnected() {
-                log.Errorf("Error listening for events. Reason: %v.", err)
-            }
-        }
-    }
-    amiService.Disconnect()
+	log.Info("Loading app configurations.")
+	loadEnv()
+	appConfig, err := conf.NewAppConf()
+	if err != nil {
+		log.Errorf("Failed to initialize app config. Reason: %v", err)
+		return
+	}
+	log.Infof("Loaded Configs:\nAMI Host: %s\nAMI Port: %d\nAMI User: %s\nHost Device ID: %s", *appConfig.AmiHost, *appConfig.AmiPort, *appConfig.AmiUsername, *appConfig.HostDeviceId)
+	amiEventConsumer := service.NewRabbitMQAmiEventConsumerService(appConfig)
+	amiService := service.NewAmiService(appConfig, amiEventConsumer)
+	log.Infof("Connecting to AMI.")
+	if err := amiService.Connect(); err != nil {
+		log.Errorf("Failed to connect to Asterisk. Reason: %v.", err)
+		return
+	}
+	log.Info("Logging in to AMI.")
+	if err := amiService.Login(); err != nil {
+		log.Errorf("Failed to login to Asterisk. Reason: %v.", err)
+	}
+	if amiService.IsLoggedIn() {
+		log.Info("Login Successful.")
+		if err := amiService.Listen(); err != nil {
+			if !strings.Contains(err.Error(), "use of closed network connection") {
+				log.Errorf("Error listening for events. Reason: %v.", err)
+				//} else if amiService.IsConnected() {
+				//	log.Errorf("Error listening for events. Reason: %v.", err)
+			}
+		}
+	}
+	amiService.Disconnect()
 }
 
 func loadEnv() {

@@ -10,6 +10,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"strconv"
 	"time"
 )
 
@@ -105,9 +106,11 @@ func (service *amiService) Login() error {
 
 func (service *amiService) Listen() error {
 	bufReader := bufio.NewReader(service.con)
+	appConfig := service.appConfig
+	hostDeviceId := *appConfig.HostDeviceId
 	var event map[string]string
 	var err error
-	for {
+	for service.isLoggedIn {
 		// Set a deadline for reading. Read operation will fail if no data is received after deadline.
 		err = service.con.SetReadDeadline(time.Now().Add(*service.appConfig.ReadTimeout))
 		if err != nil {
@@ -118,12 +121,17 @@ func (service *amiService) Listen() error {
 		if e, ok := err.(interface{ Timeout() bool }); ok && e.Timeout() {
 			// TODO: better handling of timeout and link graceful shutdown
 			log.Debug("No data received or timeout reading from ami socket.")
-			if !service.connected {
-				break
-			}
 		} else if err != nil {
 			break
 		} else {
+			/*
+				If current time is 2009-11-10 23:00:00 +0000 UTC m=+0.000000000
+				nsec = 1257894000000000000
+				See https://yourbasic.org/golang/current-time/
+			*/
+			nsec := time.Now().UnixNano() // number of nanoseconds since January 1, 1970 UTC
+			event["timestamp"] = strconv.FormatInt(nsec, 10)
+			event["host_device_id"] = hostDeviceId
 			service.amiEventConsumerService.Consume(event)
 		}
 	}
@@ -134,7 +142,6 @@ func (service *amiService) Disconnect() {
 	if service.con != nil {
 		con := service.con
 		if service.isLoggedIn {
-			service.isLoggedIn = false
 			log.Info("Logging out from AMI.")
 			appConfig := service.appConfig
 			action := map[string]string{
@@ -145,18 +152,11 @@ func (service *amiService) Disconnect() {
 			_, err := con.Write(serialized)
 			if err != nil {
 				log.Errorf("Failed to logoff from AMI. Reason: %v.", err)
-			} else {
-				reader := bufio.NewReader(con)
-				result, err := readMessage(reader)
-				if err != nil {
-					log.Errorf("Failed to read logoff response from AMI. Reason: %v.", err)
-				} else {
-					log.Infof("AMI Logoff response: %s", result["Message"])
-				}
 			}
+			service.isLoggedIn = false
 		}
-		service.connected = false
 		service.con = nil
+		service.connected = false
 		err := con.Close()
 		if err != nil {
 			log.Errorf("Failed to close opened connection in %s. Reason: %v", service.dialString, err)
