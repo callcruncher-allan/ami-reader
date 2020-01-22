@@ -1,5 +1,5 @@
 # Overview
-Application that reads from AMI socket, add timestamp then send the data to Kafka.
+Application that reads from AMI socket, add timestamp then send the data to message queue (currently RabbitMQ).
 
 # For Developers
 

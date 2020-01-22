@@ -21,7 +21,7 @@ func (service *defaultAmiEventConsumer) Initialize() error {
 	eventJobChan := make(chan map[string]string, *appConfig.NumberOfJobs)
 	numberOfWorkers := *appConfig.NumberOfWorkers
 	for w := 1; w <= numberOfWorkers; w++ {
-		go worker(w, eventJobChan)
+		go service.worker(w, eventJobChan)
 	}
 	service.eventJobChan = eventJobChan
 	return nil
@@ -36,9 +36,8 @@ func (service *defaultAmiEventConsumer) Consume(event map[string]string) {
 	service.eventJobChan <- event
 }
 
-func worker(id int, eventJobChan <-chan map[string]string) {
+func (service *defaultAmiEventConsumer) worker(id int, eventJobChan <-chan map[string]string) {
 	for event := range eventJobChan {
-		// TODO: Send to kafka broker
 		eventJsonB, _ := json.Marshal(event)
 		eventJson := string(eventJsonB)
 		fmt.Println("worker", id, "event:", eventJson)

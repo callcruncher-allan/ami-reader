@@ -1,6 +1,6 @@
 {
-  "HOST_DEVICE_ID": "sng7101",
-  "AMI_HOST": "192.168.175.235",
+  "HOST_DEVICE_ID": "bbdcc104",
+  "AMI_HOST": "x.x.x.x",
   "AMI_PORT": "5038",
   "AMI_USER": "dyncc-rx",
   "AMI_PASS": "", // Will check AMI_CONF_PATH if this is empty or not set in env
@@ -9,5 +9,8 @@
   "DIAL_RETRY": "3",
   "READ_TIMEOUT": "5",
   "NUMBER_OF_WORKERS": "50",
-  "NUMBER_OF_JOBS": "60"
+  "NUMBER_OF_JOBS": "60",
+  "AMQP_URL": "amqp://user:pass@rabbitmqhost:rabbitmqport/",
+  "AMQP_EXCHANGE_NAME": "amq.direct",
+  "AMQP_EXCHANGE_TYPE": "direct"
 }
