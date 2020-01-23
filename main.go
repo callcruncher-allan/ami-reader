@@ -36,11 +36,12 @@ func main() {
         return
     }
     log.Infof("Loaded Configs:\nAMI Host: %s\nAMI Port: %d\nAMI User: %s\nHost Device ID: %s", *appConfig.AmiHost, *appConfig.AmiPort, *appConfig.AmiUsername, *appConfig.HostDeviceId)
-    amiEventConsumer := service.NewDefaultAmiEventConsumerService(appConfig)
+    amiEventConsumer := service.NewRabbitMQAmiEventConsumerService(appConfig)
     amiService := service.NewAmiService(appConfig, amiEventConsumer)
     log.Infof("Connecting to AMI.")
     if err := amiService.Connect(); err != nil {
-        log.Errorf("Failed to connect to Asterisk. Reason: %v.", err)
+        log.Errorf("AMI Service failed to connect. Reason: %v.", err)
+        amiService.Disconnect()
         return
     }
     log.Info("Logging in to AMI.")

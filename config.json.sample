@@ -10,7 +10,7 @@
   "READ_TIMEOUT": "5",
   "NUMBER_OF_WORKERS": "50",
   "NUMBER_OF_JOBS": "60",
-  "AMQP_URL": "amqp://user:pass@rabbitmqhost:rabbitmqport/",
+  "AMQP_URL": "amqp://user:pass@rabbitmqhost:5672/",
   "AMQP_EXCHANGE_NAME": "amq.direct",
   "AMQP_EXCHANGE_TYPE": "direct"
 }

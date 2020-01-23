@@ -45,12 +45,14 @@ func (service *rabbitMQAmiEventConsumer) Initialize() error {
     // Initial AMQP
     appConfig := service.appConfig
     amqpUrl := *appConfig.AmqpUrl
+    log.Infof("Connecting to MQ %s", amqpUrl)
     conn, err := amqp.Dial(amqpUrl)
     if err != nil {
-        errMsg := fmt.Sprintf("Failed to connect mq %s.", amqpUrl)
+        errMsg := fmt.Sprintf("Failed to connect MQ %s.", amqpUrl)
         log.Error(errMsg)
         return errors.Wrap(err, errMsg)
     }
+    log.Info("Successfully connected to MQ")
     service.amqpConn = conn
     ch, err := conn.Channel()
     if err != nil {
@@ -71,7 +73,7 @@ func (service *rabbitMQAmiEventConsumer) Initialize() error {
         log.Errorf("Failed to declare amq.direct exchange. Reason %v", err)
         return errors.Wrap(err, "Failed to declare amq.direct exchange.")
     }
-
+    log.Info("Done initializing MQ")
     // Initialize workers
     eventJobChan := make(chan map[string]string, *appConfig.NumberOfJobs)
     numberOfWorkers := *appConfig.NumberOfWorkers
@@ -98,7 +100,9 @@ func (service *rabbitMQAmiEventConsumer) Destroy() {
             log.Errorf("Failed to close amqp connection. Reason: %v.", err)
         }
     }
-    close(service.eventJobChan)
+    if service.eventJobChan != nil {
+        close(service.eventJobChan)
+    }
 }
 
 func (service *rabbitMQAmiEventConsumer) Consume(event map[string]string) {
