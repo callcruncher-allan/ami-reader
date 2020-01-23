@@ -133,7 +133,7 @@ func (service *amiService) Listen() error {
 func (service *amiService) Disconnect() {
 	if service.con != nil {
 		if service.isLoggedIn {
-			log.Info("Loggin out from AMI.")
+			log.Info("Logging out from AMI.")
 			// TODO: Logout logic
 		}
 		con := service.con
