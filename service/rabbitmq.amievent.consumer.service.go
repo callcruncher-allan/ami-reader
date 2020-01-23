@@ -85,26 +85,26 @@ func (service *rabbitMQAmiEventConsumer) Initialize() error {
 }
 
 func (service *rabbitMQAmiEventConsumer) Destroy() {
+    log.Info("Closing unseen event log file.")
     if service.eventFile != nil {
-        log.Infof("Closing file %s.", service.eventFile.Name())
         if err := service.eventFile.Close(); err != nil {
             log.Errorf("Failed to close file %s. Reason: %v.", service.eventFile.Name(), err)
         }
     }
+    log.Info("Closing MQ channel.")
     if service.amqpChannel != nil {
-        log.Info("Closing MQ channel.")
         if err := service.amqpChannel.Close(); err != nil {
             log.Errorf("Failed to close amqp channel. Reason: %v.", err)
         }
     }
+    log.Info("Closing MQ connection.")
     if service.amqpConn != nil {
-        log.Info("Closing MQ connection.")
         if err := service.amqpConn.Close(); err != nil {
             log.Errorf("Failed to close amqp connection. Reason: %v.", err)
         }
     }
+    log.Info("Closing workers.")
     if service.eventJobChan != nil {
-        log.Info("Closing workers.")
         close(service.eventJobChan)
     }
 }
