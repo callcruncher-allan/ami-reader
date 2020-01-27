@@ -20,6 +20,7 @@ type AppConf struct {
     DialRetry       *int
     NumberOfWorkers *int
     NumberOfJobs    *int
+    LogEvents       *bool
     AmqpUrl         *string
     AmqpXchName     *string
     AmqpXchType     *string
@@ -55,6 +56,7 @@ func NewAppConf() (*AppConf, error) {
     if hostDeviceId == "" {
         return nil, errors.New("HOST_DEVICE_ID environment variable not found")
     }
+    logEvents := getBoolEnv("LOG_EVENTS")
     amqpUrl := getStringEnv("AMQP_URL", "")
     if amqpUrl == "" {
         return nil, errors.New("AMQP_URL environment variable not found")
@@ -72,6 +74,7 @@ func NewAppConf() (*AppConf, error) {
         &dialRetry,
         &numberOfWorkers,
         &numberOfJobs,
+        &logEvents,
         &amqpUrl,
         &amqpXchName,
         &amqpXchType,
@@ -105,5 +108,15 @@ func getIntEnv(envKey string, defaultVal int) int {
         return i
     } else {
         return defaultVal
+    }
+}
+
+func getBoolEnv(envKey string) bool {
+    str := getStringEnv(envKey, "false")
+    b, err := strconv.ParseBool(str)
+    if err == nil {
+        return b
+    } else {
+        return false
     }
 }

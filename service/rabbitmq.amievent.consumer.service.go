@@ -27,7 +27,7 @@ func NewRabbitMQAmiEventConsumerService(appConfig *conf.AppConf) AmiEventConsume
 func (service *rabbitMQAmiEventConsumer) Initialize() error {
     // Initialize unsent event logger
     currentTime := time.Now()
-    fileName := currentTime.Format("2006-01-02") + "_unsent_events.log"
+    fileName := currentTime.Format("2006-01-02") + "_events.log"
     file, err := os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
     if err == nil {
         eventLogger := log.New()
@@ -116,6 +116,7 @@ func (service *rabbitMQAmiEventConsumer) Consume(event map[string]string) {
 
 func (service *rabbitMQAmiEventConsumer) worker(id int, eventJobChan <-chan map[string]string) {
     appConfig := service.appConfig
+    logEvents := *appConfig.LogEvents
     for event := range eventJobChan {
         eventJsonB, _ := json.Marshal(event)
         eventJson := string(eventJsonB)
@@ -129,8 +130,10 @@ func (service *rabbitMQAmiEventConsumer) worker(id int, eventJobChan <-chan map[
                 ContentType: "application/json",
                 Body:        eventJsonB,
             })
-        if err != nil {
-            log.Errorf("Failed to send event: %s", eventJson)
+        if logEvents || err != nil {
+            if err != nil {
+                log.Errorf("Failed to send event: %s", eventJson)
+            }
             service.eventLogger.Info(eventJson)
         }
     }
