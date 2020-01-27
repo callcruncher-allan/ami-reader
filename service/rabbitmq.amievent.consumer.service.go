@@ -11,6 +11,16 @@ import (
     "time"
 )
 
+type MyJSONFormatter struct {
+}
+
+func (f *MyJSONFormatter) Format(entry *log.Entry) ([]byte, error) {
+    // Note this doesn't include Time, Level and Message which are available on
+    // the Entry. Consult `godoc` on information about those fields or read the
+    // source of the official loggers.
+    return append([]byte(entry.Message), '\n'), nil
+}
+
 type rabbitMQAmiEventConsumer struct {
     appConfig    *conf.AppConf
     eventJobChan chan map[string]string
@@ -31,7 +41,7 @@ func (service *rabbitMQAmiEventConsumer) Initialize() error {
     file, err := os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
     if err == nil {
         eventLogger := log.New()
-        eventLogger.SetFormatter(&log.JSONFormatter{})
+        eventLogger.SetFormatter(new(MyJSONFormatter))
         eventLogger.SetOutput(file)
         eventLogger.SetLevel(log.InfoLevel)
         service.eventFile = file
