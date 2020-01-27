@@ -136,7 +136,7 @@ func (service *amiService) Listen() error {
                 now := time.Now()
                 nsec := now.UnixNano() // number of nanoseconds since January 1, 1970 UTC
                 event["timestamp"] = strconv.FormatInt(nsec, 10)
-                event["timestamp_formatted"] = now.Format(time.RFC3339Nano)
+                event["timestamp_dt"] = now.Format("2006-01-02T15:04:05.999999Z07:00")
                 event["host_device_id"] = hostDeviceId
                 service.amiEventConsumerService.Consume(event)
             }
