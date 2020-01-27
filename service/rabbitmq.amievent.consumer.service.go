@@ -110,7 +110,6 @@ func (service *rabbitMQAmiEventConsumer) Destroy() {
 }
 
 func (service *rabbitMQAmiEventConsumer) Consume(event map[string]string) {
-    event["timestamp"] = time.Now().Format(time.RFC3339Nano)
     service.eventJobChan <- event
 }
 

@@ -10,20 +10,21 @@ import (
 )
 
 type AppConf struct {
-    AmiUsername     *string
-    AmiPassword     *string
-    AmiHost         *string
-    AmiPort         *int
-    HostDeviceId    *string
-    DialTimeout     *time.Duration
-    ReadTimeout     *time.Duration
-    DialRetry       *int
-    NumberOfWorkers *int
-    NumberOfJobs    *int
-    LogEvents       *bool
-    AmqpUrl         *string
-    AmqpXchName     *string
-    AmqpXchType     *string
+    AmiUsername        *string
+    AmiPassword        *string
+    AmiHost            *string
+    AmiPort            *int
+    HostDeviceId       *string
+    DialTimeout        *time.Duration
+    ReadTimeout        *time.Duration
+    DialRetry          *int
+    NumberOfWorkers    *int
+    NumberOfJobs       *int
+    LogEvents          *bool
+    AmqpUrl            *string
+    AmqpXchName        *string
+    AmqpXchType        *string
+    AmqpExcludedEvents *[]string
 }
 
 func NewAppConf() (*AppConf, error) {
@@ -63,6 +64,11 @@ func NewAppConf() (*AppConf, error) {
     }
     amqpXchName := getStringEnv("AMQP_EXCHANGE_NAME", "amq.direct")
     amqpXchType := getStringEnv("AMQP_EXCHANGE_TYPE", "direct")
+    // TODO: make amqpExcludedEvents configurable in config.json
+    // For now, exclude Auth related events
+    amqpExcludedEvents := make([]string, 2)
+    amqpExcludedEvents[0] = "SuccessfulAuth"
+    amqpExcludedEvents[1] = "ChallengeSent"
     return &AppConf{
         &amiUser,
         &amiPassword,
@@ -78,6 +84,7 @@ func NewAppConf() (*AppConf, error) {
         &amqpUrl,
         &amqpXchName,
         &amqpXchType,
+        &amqpExcludedEvents,
     }, nil
 }
 
