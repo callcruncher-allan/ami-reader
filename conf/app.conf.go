@@ -66,9 +66,10 @@ func NewAppConf() (*AppConf, error) {
     amqpXchType := getStringEnv("AMQP_EXCHANGE_TYPE", "direct")
     // TODO: make amqpExcludedEvents configurable in config.json
     // For now, exclude Auth related events
-    amqpExcludedEvents := make([]string, 2)
+    amqpExcludedEvents := make([]string, 3)
     amqpExcludedEvents[0] = "SuccessfulAuth"
     amqpExcludedEvents[1] = "ChallengeSent"
+    amqpExcludedEvents[2] = "QueueMemberStatus"
     return &AppConf{
         &amiUser,
         &amiPassword,
