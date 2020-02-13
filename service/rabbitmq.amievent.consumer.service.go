@@ -136,6 +136,7 @@ func (service *rabbitMQAmiEventConsumer) worker(id int, eventJobChan <-chan map[
             true,                     // undelivered when no queue is bound that matches the routing key
             false,                    // deliver even if no consumer on the matched queue is ready to accept the delivery
             amqp.Publishing{
+                DeliveryMode: amqp.Persistent,
                 ContentType: "application/json",
                 Body:        eventJsonB,
             })
